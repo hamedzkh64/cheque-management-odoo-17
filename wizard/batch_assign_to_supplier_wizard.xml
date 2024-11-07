@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="batch_assign_to_supplier_wizard_view" model="ir.ui.view">
+        <field name="name">batch.assign.to.supplier.wizard</field>
+        <field name="model">batch.assign.to.supplier.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Batch Processing for Supplier Assignment">
+                <group>
+                    <field name="cheque_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="supplier_id" options="{'no_create': True}" required="1"/>
+                    <field name="bank_acc" options="{'no_create': True}"/>
+                    <field name="cheque_date"/>
+                </group>
+                <footer>
+                    <button name="action_assign" type="object" string="Assign to Supplier" class="oe_highlight"/>
+                    <button name="cancel" string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_batch_assign_to_supplier_wizard" model="ir.actions.act_window">
+        <field name="name">Batch Assign to Supplier</field>
+        <field name="res_model">batch.assign.to.supplier.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="batch_assign_to_supplier_wizard_view"/>
+        <field name="target">new</field>
+    </record>
+</odoo>
