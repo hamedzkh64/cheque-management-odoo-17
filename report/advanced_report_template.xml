@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_cheque_advanced">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Advanced Cheque Report</h2>
+                    <div class="row mt32 mb32">
+                        <div class="col-3">
+                            <strong>Date From:</strong>
+                            <p t-field="doc.date_from"/>
+                        </div>
+                        <div class="col-3">
+                            <strong>Date To:</strong>
+                            <p t-field="doc.date_to"/>
+                        </div>
+                    </div>
+                    
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Sequence</th>
+                                <th>Date</th>
+                                <th>Due Date</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Bank</th>
+                                <th>Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="cheque">
+                                <tr>
+                                    <td><span t-field="cheque.seq_no"/></td>
+                                    <td><span t-field="cheque.cheque_date"/></td>
+                                    <td><span t-field="cheque.due_date"/></td>
+                                    <td><span t-field="cheque.category_id.name"/></td>
+                                    <td><span t-field="cheque.amount"/></td>
+                                    <td><span t-field="cheque.state"/></td>
+                                    <td><span t-field="cheque.cheque_book_id.bank_name"/></td>
+                                    <td><span t-field="cheque.branch_code"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
