@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="cheque_spend_view_form" model="ir.ui.view">
+        <field name="name">cheque.spend</field>
+        <field name="model">cheque.spend</field>
+        <field name="arch" type="xml">
+            <form string="Cheque Spend">
+                <header>
+                    <button name="action_open_return_wizard" type="object" string="Return Cheque" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group col="2">
+                            <field name="recipient_id"/>
+                            <field name="category_id"/>
+                            <field name="journal_id" required="1"/>
+                        </group>
+                        <group col="2">
+                            <field name="amount" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id', 'field_digits': True}"
+                                   required="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attachments">
+                            <field name="cash_box_cheque_ids">
+                                <tree string="Available Cashbox Cheques">
+                                    <field name="name"/>
+                                    <field name="debit_account"/>
+                                    <field name="cheque_date"/>
+                                    <field name="cheque_receive_date"/>
+                                    <field name="category_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="cheque_spend_tree_views" model="ir.ui.view">
+        <field name="name">cheque.spend</field>
+        <field name="model">cheque.spend</field>
+        <field name="arch" type="xml">
+            <tree string="Incoming Cheques">
+                <field name="name"/>
+                <field name="recipient_id"/>
+                <field name="cash_box_cheque_ids"/>
+                <field name="amount" widget="monetary"
+                       options="{'currency_field': 'company_currency_id', 'field_digits': True}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_cheque_spend" model="ir.actions.act_window">
+        <field name="name">Cheque Spend</field>
+        <field name="res_model">cheque.spend</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="view_id" ref="cheque_spend_tree_views"/>
+    </record>
+
+    <menuitem id="menu_cheque_spend" name="Cheque Spend" parent="account.menu_finance_receivables"
+              action="action_cheque_spend" groups="account.group_account_manager"/>
+</odoo>
