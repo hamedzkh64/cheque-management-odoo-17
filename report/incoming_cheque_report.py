@@ -18,7 +18,18 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from odoo import api, fields, models
 
-from . import incoming_cheque_report
-from . import outgoing_cheque_report
-from . import report_wizard
+class IncomingChequeReportProforma(models.AbstractModel):
+    _name = 'incoming.cheque.report_saleproforma'
+    _description = 'Incoming Cheque Report'
+
+
+    def get_report_values(self, docids, data=None):
+        docs = self.env['cheque.manage'].browse(docids)
+        return {
+            'doc_ids': docs.ids,
+            'doc_model': 'cheque.manage',
+            'docs': docs,
+            'proforma': True
+        }
