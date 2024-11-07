@@ -27,11 +27,11 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "streamlit run pages/cash_flow_analysis.py"
+args = "streamlit run menu_structure.py"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "streamlit run pages/cash_flow_analysis.py"]
+run = ["sh", "-c", "streamlit run menu_structure.py"]
 
 [[ports]]
 localPort = 5000

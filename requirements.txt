@@ -16,3 +16,4 @@ pandas
 plotly
 scipy
 streamlit
+graphviz
