@@ -1,1 +1,36 @@
+<!-- data/cron_cheque_notifications.xml -->
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_cheque_notifications" model="ir.cron">
+            <field name="name">Cheque Due Date Notifications</field>
+            <field name="model_id" ref="model_cheque_manage"/>
+            <field name="state">code</field>
+            <field name="code">model._send_cheque_notifications()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+        </record>
 
+        <record id="ir_cron_cheque_reminders" model="ir.cron">
+            <field name="name">Automated Cheque Due Date Reminders</field>
+            <field name="model_id" ref="model_cheque_manage"/>
+            <field name="state">code</field>
+            <field name="code">model.automated_cheque_due_date_reminders()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="ir_cron_cheque_due_reminder" model="ir.cron">
+            <field name="name">Cheque Due Date Reminder</field>
+            <field name="model_id" ref="model_cheque_manage"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_cheque_due_reminder()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>
