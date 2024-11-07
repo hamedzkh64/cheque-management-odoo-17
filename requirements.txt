@@ -1,0 +1,13 @@
+# Core dependencies
+odoo>=17.0.0
+streamlit>=1.28.0
+plotly>=5.18.0
+pandas>=2.1.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Additional dependencies
+python-dateutil>=2.8.2
+pytz>=2023.3
+requests>=2.31.0
+Pillow>=10.0.0
