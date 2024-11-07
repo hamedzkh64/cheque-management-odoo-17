@@ -19,11 +19,11 @@
 #
 ##############################################################################
 {
-    'name' : 'Cheque/Check Management in Odoo',
-    'version' : '17.0.1.0.16',
-    'author' : 'Globalteckz',
-    'category' : 'Accounting',
-    'description' : """
+    'name': 'Cheque/Check Management in Odoo',
+    'version': '17.0.1.0.16',
+    'author': 'Globalteckz',
+    'category': 'Accounting',
+    'description': """
 check management
 cheque management
 bank check
@@ -57,18 +57,20 @@ cheques management in odoo
 
 """,
     'website': 'https://www.globalteckz.com',
-    'summary': """This module will help to track outgoing checks and incoming checks outgoing check and incoming check outgoing cheque and incoming cheque outgoing cheques and incoming cheques Post Dated Cheque management PDC cheque management account check post dated check PDC check customer check vendor check writing account check writing account cheque writing incoming check outgoing check print cheque print check bank cheque printing check Check management check handling cheque printing in odoo check printing in odoo check returns cheque returns handling check cancellation cheque cancel cheque deposit incoming check handling outgoing check handling bounce check handling bounce cheque demand draft handling dd handling """,
-    'depends' : ['base', 'account','attachment_indexation','account_accountant', 'sms', 'whatsapp'],
-    "license" : 'Other proprietary',
+    'summary': """This module will help to track outgoing checks and incoming checks with multi-branch support""",
+    'depends': ['base', 'account', 'attachment_indexation', 'account_accountant', 'sms', 'whatsapp', 'mail'],
+    "license": 'Other proprietary',
     'images': ['static/description/Banner.gif'],
     "price": "49.00",
     "currency": "EUR",
     'data': [
+        'security/branch_security.xml',
         'security/ir.model.access.csv',
         'wizard/cheque_wizard.xml',
         'wizard/batch_assign_to_supplier_wizard.xml',
         'report/report_wizard_view.xml',
         'report/cheque_report.xml',
+        'views/branch_view.xml',
         'views/cheque_payment.xml',
         'views/cheque_spend.xml',
         'views/cheque_book.xml',
@@ -80,10 +82,8 @@ cheques management in odoo
         'views/res_partner.xml',
         'views/cheque_category.xml',
         'data/cron_cheque_notifications.xml',
-       # 'report/incoming_cheque_template.xml',
-       # 'report/outgoing_cheque_template.xml',
     ],
-    'qweb' : [],
+    'qweb': [],
     'test': [],
     'installable': True,
     'auto_install': False,

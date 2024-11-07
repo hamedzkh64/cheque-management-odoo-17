@@ -10,11 +10,23 @@ class ChequeManage(models.Model):
     _inherit = ['mail.thread']
     _description = 'Cheque Manage'
     
-    # Enhanced fields for better tracking
+    # Adding branch-related fields
+    branch_id = fields.Many2one('cheque.branch', string='Branch', required=True, tracking=True,
+                               default=lambda self: self.env.user.branch_id)
+    source_branch_id = fields.Many2one('cheque.branch', string='Source Branch', readonly=True, tracking=True)
+    destination_branch_id = fields.Many2one('cheque.branch', string='Destination Branch', tracking=True)
+    transfer_state = fields.Selection([
+        ('none', 'No Transfer'),
+        ('outgoing', 'Outgoing Transfer'),
+        ('incoming', 'Incoming Transfer'),
+        ('completed', 'Transfer Completed')
+    ], string='Transfer Status', default='none', tracking=True)
+    
+    # Existing fields...
     seq_no = fields.Char(string='Sequence', copy=False, readonly=True)
     name = fields.Char(string='Name', tracking=True)
-    attachment_count = fields.Integer(string='Attachment Count', compute='_get_attach', readonly=True, copy=False)
-    journal_item_count = fields.Integer(string='Journal Items', compute='_journal_item_count', readonly=True, copy=False)
+    attachment_count = fields.Integer(string='Attachment Count', compute='_get_attach', readonly=True)
+    journal_item_count = fields.Integer(string='Journal Items', compute='_journal_item_count', readonly=True)
     
     # Enhanced payer and owner information
     payer = fields.Many2one('res.partner', 'Payer', tracking=True)
@@ -204,6 +216,129 @@ class ChequeManage(models.Model):
         if self.state == 'bounce':
             self.state = 'return_cashbox'
             _logger.info(f'Cheque {self.seq_no} returned to cashbox')
+
+    def action_transfer_to_branch(self):
+        """Initiate transfer to another branch"""
+        self.ensure_one()
+        if not self.destination_branch_id:
+            raise UserError(_('Please select a destination branch for transfer.'))
+            
+        if self.destination_branch_id.id not in self.branch_id.allowed_transfer_branch_ids.ids:
+            raise UserError(_('Transfer to selected branch is not allowed.'))
+            
+        self.write({
+            'transfer_state': 'outgoing',
+            'source_branch_id': self.branch_id.id,
+            'state': 'transfer'
+        })
+        
+        # Create transfer journal entries
+        self._create_transfer_journal_entries()
+        
+        # Notify destination branch
+        self._notify_destination_branch()
+
+    def action_receive_from_branch(self):
+        """Accept transfer from another branch"""
+        self.ensure_one()
+        if self.transfer_state != 'outgoing':
+            raise UserError(_('This cheque is not marked for transfer.'))
+            
+        self.write({
+            'transfer_state': 'completed',
+            'branch_id': self.destination_branch_id.id,
+            'state': 'register'
+        })
+        
+        # Create receiving journal entries
+        self._create_receiving_journal_entries()
+        
+        # Notify source branch
+        self._notify_source_branch()
+
+    def _create_transfer_journal_entries(self):
+        """Create journal entries for branch transfer"""
+        move_vals = {
+            'date': fields.Date.today(),
+            'journal_id': self.journal_id.id,
+            'ref': f'Transfer: {self.seq_no}',
+            'branch_id': self.branch_id.id,
+            'line_ids': [
+                (0, 0, {
+                    'account_id': self.branch_id.transit_account_id.id,
+                    'debit': self.amount,
+                    'credit': 0.0,
+                    'name': f'Transfer to {self.destination_branch_id.name}',
+                }),
+                (0, 0, {
+                    'account_id': self.credit_account.id,
+                    'debit': 0.0,
+                    'credit': self.amount,
+                    'name': f'Transfer from {self.branch_id.name}',
+                })
+            ]
+        }
+        move = self.env['account.move'].create(move_vals)
+        move.action_post()
+
+    def _create_receiving_journal_entries(self):
+        """Create journal entries for receiving branch"""
+        move_vals = {
+            'date': fields.Date.today(),
+            'journal_id': self.destination_branch_id.default_journal_id.id,
+            'ref': f'Receive: {self.seq_no}',
+            'branch_id': self.destination_branch_id.id,
+            'line_ids': [
+                (0, 0, {
+                    'account_id': self.debit_account.id,
+                    'debit': self.amount,
+                    'credit': 0.0,
+                    'name': f'Receive from {self.source_branch_id.name}',
+                }),
+                (0, 0, {
+                    'account_id': self.destination_branch_id.transit_account_id.id,
+                    'debit': 0.0,
+                    'credit': self.amount,
+                    'name': f'Transfer completion',
+                })
+            ]
+        }
+        move = self.env['account.move'].create(move_vals)
+        move.action_post()
+
+    def _notify_destination_branch(self):
+        """Notify destination branch about incoming transfer"""
+        message = _(
+            'Incoming cheque transfer from %(branch)s\n'
+            'Cheque Number: %(cheque)s\n'
+            'Amount: %(amount)s'
+        ) % {
+            'branch': self.branch_id.name,
+            'cheque': self.seq_no,
+            'amount': self.amount
+        }
+        self.message_post(
+            body=message,
+            partner_ids=self.destination_branch_id.manager.partner_id.ids,
+            message_type='notification'
+        )
+
+    def _notify_source_branch(self):
+        """Notify source branch about completed transfer"""
+        message = _(
+            'Cheque transfer completed by %(branch)s\n'
+            'Cheque Number: %(cheque)s\n'
+            'Amount: %(amount)s'
+        ) % {
+            'branch': self.destination_branch_id.name,
+            'cheque': self.seq_no,
+            'amount': self.amount
+        }
+        self.message_post(
+            body=message,
+            partner_ids=self.source_branch_id.manager.partner_id.ids,
+            message_type='notification'
+        )
 
     def get_cheque_status_report(self):
         self.ensure_one()
