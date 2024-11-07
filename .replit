@@ -27,11 +27,11 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "streamlit run cheque-managment-odoo-17/pages/menu_structure.py"
+args = "streamlit run pages/menu_structure.py"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "streamlit run cheque-managment-odoo-17/pages/menu_structure.py"]
+run = ["sh", "-c", "streamlit run pages/menu_structure.py"]
 
 [[ports]]
 localPort = 5000
