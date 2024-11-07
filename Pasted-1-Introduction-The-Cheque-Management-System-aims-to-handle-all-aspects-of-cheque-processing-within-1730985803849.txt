@@ -1,0 +1,84 @@
+1. Introduction
+
+The Cheque Management System aims to handle all aspects of cheque processing within the Odoo Accounting Module, including receiving, issuing, endorsing, transferring to the bank, and managing returns. The system should automate accounting entries with debit and credit assignments, manage reminders for due dates and returns, and integrate cheque payments with Invoices, Purchase Orders, and Sales Orders.
+
+2. Objectives
+
+Automate Cheque Operations: Enable efficient handling of received, issued, endorsed, and transferred cheques.
+Detailed Accounting Integration: Automatically generate accounting entries with debit, credit, and journal configurations.
+Event-Based Notifications: Provide reminders for cheque due dates, returns, and other critical events.
+Financial Analysis and Reporting: Generate comprehensive reports on cash flow, cheque status, and liquidity.
+Multi-Branch Coordination: Streamline cheque management across company branches.
+Draft Status and Revert to Draft: Allow each cheque or checkbook record to be reverted to "Draft" status at any stage in the workflow for further editing or correction before finalizing.
+3. System Requirements
+
+3.1 Checkbook Management
+
+Purpose: This module should allow users to define and manage checkbooks, automatically generating cheque leaves based on configuration. Each checkbook is linked to a specific bank account and is available for cheque issuance.
+
+Fields for Checkbook Setup:
+
+Bank Account: Link the checkbook to a company bank account.
+Bank Name and Branch: Enter the bank’s name and branch information.
+Total Number of Leaves: Define the total number of leaves in the checkbook (e.g., 10, 25, 50, 100).
+Starting Check Number: Set the starting cheque number for the checkbook.
+Starting Serial Number: Enter the first serial number for tracking.
+Starting Saad Number: Input the first Saad number.
+Automated Leaf Generation:
+
+Based on the initial setup, the system should generate all cheque leaves with sequential serial numbers, cheque numbers, and Saad numbers.
+Generated leaves should be available in the Issue Cheques form, with details auto-filled based on the selected leaf.
+Revert to Draft Option:
+
+Each checkbook and leaf should have an option to revert to draft status if changes or corrections are needed before they are finalized.
+3.2 Category Settings
+
+Purpose: The Category Settings module should allow users to set up accounting categories, specifying debit account, credit account, and journal assignments for each category. These settings should ensure accurate and automated accounting across all cheque operations.
+
+Fields for Category Setup:
+
+Category Name: Define the name (e.g., Receivables, Payables, Cleared Cheques, Returned Cheques).
+Account Type: Specify the account type (e.g., income, expense, receivable, payable, journal).
+Debit Account: Select the account to debit in relevant transactions.
+Credit Account: Select the account to credit in relevant transactions.
+Journal: Assign the journal type (e.g., Receivables Journal, Payables Journal).
+Description: Add additional notes for clarity.
+Category Assignments in Cheque Operations:
+
+The debit account, credit account, and journal specified for each category should apply automatically to all cheque operations (receiving, issuing, endorsing, transferring, clearing, and returning).
+Revert to Draft Option:
+
+Each category and associated settings should have an option to revert to draft status for editing before the settings are saved as final.
+3.3 Detailed Forms and Workflows
+
+Each form in the Cheque Management System should allow for cheque data entry, selection of accounting categories, and automatic accounting entry generation. Each step in the workflow (Received, Issued, Endorsed, Transferred to Bank) should include the ability to revert to draft status for additional modifications if necessary.
+
+3.4 Integration with Invoices, Purchase Orders, and Sales Orders
+
+"Make Payment" Option for Cheque Payment: Each Invoice, Purchase Order, and Sales Order should include a "Make Payment" button with a Cheque Payment option.
+Linking and Payment Status Tracking: Upon saving, cheque payments should link to the originating Invoice, Purchase Order, or Sales Order. The document’s status should reflect the cheque’s status:
+Paid for fully cleared cheques
+Partially Paid for partial payments
+Returned if cheque bounces
+Revert to Draft Option: The payment record should have an option to revert to draft if changes are needed before finalization.
+3.5 Notifications and Reminders
+
+Types of Notifications:
+
+Upcoming Maturity Alerts: Based on cheque amount, scheduled for large, medium, and small cheques.
+Returned Cheque Alerts: Immediate notifications for returned cheques.
+Scheduled Payment Reminders: Reminders for issued cheques nearing due dates.
+Customization Options:
+
+Frequency: Daily, weekly, or monthly.
+Channels: Email, SMS, or WhatsApp.
+Recipient Groups: Assign notifications to specific users or roles.
+3.6 Reporting and Analytics
+
+Standard Reports: Generate detailed reports for Received Cheques, Issued Cheques, Endorsed Cheques, Returned Cheques, and Cash Flow Analysis. Filters should allow for tracking by customer, supplier, amount, and cheque status.
+Final Request:
+
+Please ensure that all specified changes, including the draft status and revert to draft options, are fully implemented in the updated version in my GitHub repository. Confirm that all requested updates are thoroughly tested and correctly applied.
+
+Let me know if there are any additional details needed to clarify this request!
+
