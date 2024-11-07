@@ -7,8 +7,6 @@ import numpy as np
 from scipy import stats
 
 def load_mock_data():
-    # TODO: Replace with actual database connection
-    # For now using mock data for development
     dates = pd.date_range(start='2024-01-01', end='2024-12-31', freq='D')
     np.random.seed(42)
     
@@ -141,7 +139,7 @@ def main():
     
     # Monthly Analysis
     st.subheader("Monthly Analysis")
-    monthly_df = filtered_df.set_index('date').resample('M').agg({
+    monthly_df = filtered_df.set_index('date').resample('ME').agg({
         'incoming_amount': 'sum',
         'outgoing_amount': 'sum',
         'net_cash_flow': 'sum'
