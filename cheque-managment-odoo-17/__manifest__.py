@@ -27,12 +27,11 @@
 Comprehensive financial transaction management system with advanced features:
 - Multi-branch operations with hierarchical management
 - Enhanced payment processing with multiple payment methods
-- Advanced cash flow analysis and forecasting
-- Comprehensive reporting system
+- Advanced reporting and analytics
 - Enhanced security and validation
 """,
     'website': 'https://www.globalteckz.com',
-    'summary': """Complete financial transaction management with multi-branch support, advanced analytics, and enhanced security.""",
+    'summary': """Complete financial transaction management with multi-branch support and enhanced security.""",
     'depends': [
         'base',
         'account',
@@ -47,11 +46,8 @@ Comprehensive financial transaction management system with advanced features:
     ],
     'external_dependencies': {
         'python': [
-            'pandas',
-            'numpy',
-            'plotly',
-            'streamlit',
-            'scipy'
+            'openpyxl',
+            'xlsxwriter'
         ],
     },
     "license": 'Other proprietary',
