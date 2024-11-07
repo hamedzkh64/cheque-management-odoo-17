@@ -1,4 +1,4 @@
-    #
+#
 #    Globalteckz Pvt Ltd
 #    Copyright (C) 2013-Today(www.globalteckz.com).
 #
@@ -17,22 +17,54 @@
 #
 ##############################################################################
 
-from odoo import fields, models ,api, _
+from odoo import fields, models, api, _
 from odoo.exceptions import UserError, ValidationError
 import logging
-
 
 _logger = logging.getLogger(__name__)
 
 class AccountPaymentMethod(models.Model):
     _inherit = 'account.payment.method'
     
-    payment_type = fields.Selection([('inbound', 'Inbound'), ('outbound', 'Outbound'), ('cheque', 'Cheque')], required=True)
+    payment_type = fields.Selection([
+        ('inbound', 'Inbound'),
+        ('outbound', 'Outbound'),
+        ('cheque', 'Cheque'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('credit_card', 'Credit Card'),
+        ('debit_card', 'Debit Card'),
+        ('digital_wallet', 'Digital Wallet'),
+        ('cash', 'Cash')
+    ], required=True)
     
-       
+    payment_processor_id = fields.Many2one('payment.processor', string='Payment Processor')
+    requires_bank_account = fields.Boolean(string='Requires Bank Account')
+    requires_card_info = fields.Boolean(string='Requires Card Information')
+    supports_refund = fields.Boolean(string='Supports Refund', default=True)
+    
+    @api.onchange('payment_type')
+    def _onchange_payment_type(self):
+        self.requires_bank_account = self.payment_type in ['bank_transfer', 'cheque']
+        self.requires_card_info = self.payment_type in ['credit_card', 'debit_card']
+
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
     
+    payment_processor_id = fields.Many2one('payment.processor', string='Payment Processor')
+    processing_fee = fields.Monetary(string='Processing Fee', compute='_compute_processing_fee')
+    card_number = fields.Char(string='Card Number')
+    card_holder = fields.Char(string='Card Holder')
+    card_expiry = fields.Char(string='Card Expiry')
+    bank_account_id = fields.Many2one('res.partner.bank', string='Bank Account')
+    
+    @api.depends('payment_processor_id', 'amount')
+    def _compute_processing_fee(self):
+        for payment in self:
+            if payment.payment_processor_id:
+                payment.processing_fee = payment.payment_processor_id.calculate_processing_fee(payment.amount)
+            else:
+                payment.processing_fee = 0.0
+
     @api.depends('cheque_out_attach_line')
     def _get_attach(self):
         for record in self:
@@ -41,7 +73,6 @@ class AccountPayment(models.Model):
             _logger.info(
                 f"Updated attachment count for cheque ID: {record.id} - Initial: {initial_count}, New: {record.attachment_count}")
 
-    
     attachment_count = fields.Integer(string='Attachment Count', compute='_get_attach', readonly=True)
     cheque_date = fields.Date(string='Cheque Date')
     cheque_receive_date = fields.Date(string='Cheque Receive Date')
@@ -60,13 +91,23 @@ class AccountPayment(models.Model):
     debit_account_id = fields.Many2one('account.account', string='Debit Account')
     category_id = fields.Many2one('cheque.category', string = "Cheque category")
 
-
     @api.onchange('category_id')
     def _onchange_category_id(self):
         if self.category_id and self.payment_type == 'inbound':
             self.debit_account_id = self.category_id.debit_account
         elif self.category_id and self.payment_type == 'outbound':
             self.credit_account_id = self.category_id.credit_account
+
+    def action_post(self):
+        for rec in self:
+            # For non-cheque payments, process through payment processor
+            if rec.payment_method_id.payment_type != 'cheque' and rec.payment_processor_id:
+                rec.payment_processor_id.process_payment(rec)
+            # For cheque payments, use existing cheque processing logic
+            elif rec.payment_method_id.payment_type == 'cheque':
+                return super(AccountPayment, self).action_post()
+            else:
+                raise UserError(_('Please select a payment processor for non-cheque payments.'))
 
     def action_cashed(self):
         _logger.info(f"Opening cashing wizard for cheque ID(s): {self.ids}")
@@ -79,8 +120,6 @@ class AccountPayment(models.Model):
             'target': 'new',
         }
     
-    
-
     def action_submit(self):
         """ Create the journal items for the payment and update the payment's state to 'posted'.
             A journal entry is created containing an item in the source liquidity account (selected journal's default_debit or default_credit)
@@ -89,7 +128,6 @@ class AccountPayment(models.Model):
             If the payment is a transfer, a second journal entry is created in the destination journal to receive money from the transfer account.
         """
         for rec in self:
-
             if rec.state != 'draft':
                 _logger.warning(f"Payment ID: {rec.id} is not in draft state and cannot be posted.")
                 raise UserError(_('Only a draft payment can be posted.'))
@@ -137,7 +175,6 @@ class AccountPayment(models.Model):
             _logger.info(f"Payment ID: {rec.id} has been posted with journal entry name: {move.name}")
 
         return True
-    
 
     def button_journal_entries(self):
         _logger.info(f"Opening journal items for payment ID(s): {self.ids}")
@@ -151,37 +188,29 @@ class AccountPayment(models.Model):
             'domain': [('payment_id', 'in', self.ids)],
         }
 
-    
-
     def action_bounce(self):
         _logger.info(f"Setting state to 'bounce' for cheque ID(s): {self.ids}")
         return self.write({'state': 'bounce'})
     
-
     def action_draft(self):
         _logger.info(f"Reverting cheque ID(s): {self.ids} to draft state.")
         return self.write({'state': 'draft'})
     
-
     def action_return(self):
         _logger.info(f"Setting state to 'return' for cheque ID(s): {self.ids}")
         return self.write({'state': 'return'})
     
-
     def action_deposit(self):
         _logger.info(f"Setting state to 'deposit' for cheque ID(s): {self.ids}")
         return self.write({'state': 'deposit'})
     
-
     def action_transfer(self):
         _logger.info(f"Setting state to 'transfer' for cheque ID(s): {self.ids}")
         return self.write({'state': 'transfer'})
 
-    
 class ChequeOutgoingAttach(models.Model):
     _name = 'cheque.outgoing.attach'
     _description = 'Cheque Outgoing Attach'
-
 
     cheque_out_id = fields.Many2one('account.payment', string='Cheque Attach')
     name = fields.Char(string='Name')
